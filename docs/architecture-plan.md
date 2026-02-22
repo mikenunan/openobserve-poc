@@ -1,8 +1,25 @@
 # A-Bank Customer & Document Management PoC — Architecture Plan
 
 > **Author:** Principal Engineer  
-> **Date:** 2026-02-20  
-> **Status:** APPROVED — updated with review feedback (v2)
+> **Date:** 2026-02-22  
+> **Status:** APPROVED — updated with deployment context (v3)
+
+---
+
+## 0. Purpose & Context
+
+This PoC demonstrates **OpenObserve + OpenTelemetry** as a unified observability platform to the engineering team at an online UK bank. The application is a simplified customer record and document management system — representative of real internal tooling — instrumented with distributed tracing, structured logging, and metrics.
+
+| Item                 | Detail                                                                 |
+| -------------------- | ---------------------------------------------------------------------- |
+| **Audience**         | Bank engineering team                                                  |
+| **Goal**             | Evaluate OpenObserve as an observability solution for microservices    |
+| **Deployment**       | Local Docker Compose on macOS (MacBook)                                |
+| **Dev environment**  | Personal Windows hardware + GitHub repo (accessible from bank MacBook) |
+| **Phase 2 (future)** | GKE deployment with CI/CD pipeline on Google Cloud — see §8            |
+
+> [!NOTE]
+> Nothing in this Phase 1 architecture constrains a later move to GKE/Cloud Run. All services are containerised with health-check endpoints, structured logging, and OTel instrumentation — these are prerequisites for any cloud-native deployment.
 
 ---
 
@@ -181,6 +198,10 @@ Returns 404 if the document name is not recognised.
     1. Calls `HEAD /customer?partyId=<id>` on **PartyMan** to confirm the customer exists (expects 200; returns 422 if 404).
     2. Calls `HEAD /document?name=<name>` on **DocumentCatalogue** to confirm the document name is valid (expects 200; returns 422 if 404).
     3. Only creates the affiliation if both checks pass.
+- **Pre-seeded affiliations:** At startup, the service loads a small set of demo affiliations so the frontend has data to display immediately without needing to curl in affiliations during a demo:
+    - `12345` → "A-Bank customer Ts&Cs"
+    - `12345` → "FSCS Info Sheet"
+    - `12347` → "Savings Account Ts&Cs"
 - Service-to-service calls use internal Docker network hostnames (e.g., `http://partyman:8081`).
 - **Structured logging:** All handlers log via `slog` with JSON output.
 
@@ -226,9 +247,11 @@ A single nginx container provides a unified entry point for the browser, elimina
 
 ```
 openobserve-poc/
+├── .gitattributes                  # Force LF line endings (cross-platform)
 ├── docker-compose.yml              # Orchestrates all containers
 ├── docs/
-│   └── architecture-plan.md        # This document
+│   ├── architecture-plan.md        # This document
+│   └── demo-script.md              # Guided walkthrough for presenting the demo
 │
 ├── services/
 │   ├── partyman/
@@ -299,6 +322,7 @@ openobserve-poc/
 | 0.3 | Write nginx reverse-proxy config (`nginx/nginx.conf`)                              | 15 min |
 | 0.4 | Write OTel Collector config (`otel-collector-config.yaml`)                         | 20 min |
 | 0.5 | Update `.gitignore` for Go, Node, and Docker artefacts                             | 10 min |
+| 0.6 | Add `.gitattributes` for cross-platform line-ending normalisation                  | 5 min  |
 
 ### Phase 1 — PartyMan Service
 
@@ -337,10 +361,11 @@ openobserve-poc/
 | 3.2 | Implement cross-service validation helper (`HEAD` calls to PartyMan + DocumentCatalogue) | 20 min |
 | 3.3 | Implement `POST /affiliation` handler with validation + duplicate check                  | 20 min |
 | 3.4 | Implement `GET /documents?partyId=` handler                                              | 15 min |
-| 3.5 | Add `GET /health` endpoint                                                               | 5 min  |
-| 3.6 | Set up `slog` JSON structured logging                                                    | 10 min |
-| 3.7 | Add OTel instrumentation                                                                 | 25 min |
-| 3.8 | Write Dockerfile                                                                         | 10 min |
+| 3.5 | Add pre-seeded demo affiliations at startup                                              | 10 min |
+| 3.6 | Add `GET /health` endpoint                                                               | 5 min  |
+| 3.7 | Set up `slog` JSON structured logging                                                    | 10 min |
+| 3.8 | Add OTel instrumentation                                                                 | 25 min |
+| 3.9 | Write Dockerfile                                                                         | 10 min |
 
 ### Phase 4 — React Frontend
 
@@ -367,14 +392,15 @@ openobserve-poc/
 
 ### Phase 6 — End-to-End Validation
 
-| #   | Task                                                                                  | Est.   |
-| --- | ------------------------------------------------------------------------------------- | ------ |
-| 6.1 | `docker compose up` — verify all containers start cleanly                             | 15 min |
-| 6.2 | Walk through the full user journey in the browser                                     | 15 min |
-| 6.3 | Verify telemetry end-to-end (trace from frontend call → service → OTel → OpenObserve) | 20 min |
-| 6.4 | Write a brief `README.md` with setup & usage instructions                             | 20 min |
+| #   | Task                                                                                          | Est.   |
+| --- | --------------------------------------------------------------------------------------------- | ------ |
+| 6.1 | `docker compose up` — verify all containers start cleanly                                     | 15 min |
+| 6.2 | Walk through the full user journey in the browser                                             | 15 min |
+| 6.3 | Verify telemetry end-to-end (trace from frontend call → service → OTel → OpenObserve)         | 20 min |
+| 6.4 | Write `README.md` with purpose/context framing, setup & usage instructions, known limitations | 25 min |
+| 6.5 | Write `docs/demo-script.md` — guided walkthrough for presenting the demo                      | 20 min |
 
-**Estimated total: ~12–14 hours** (solo developer, including learning-curve allowance for OTel/OpenObserve)
+**Estimated total: ~13–15 hours** (solo developer, including learning-curve allowance for OTel/OpenObserve)
 
 ---
 
@@ -438,7 +464,27 @@ This eliminates all CORS issues and gives the frontend a single origin to call.
 
 ## 7. Next Steps
 
-All gaps reviewed and decisions incorporated (v2). Ready to proceed:
+All gaps reviewed and deployment context incorporated (v3). Ready to proceed:
 
 1. **Approve** → Implementation begins at Phase 0.
-2. Implementation order: Phase 0 (scaffolding) → Phase 1–3 (services, parallelisable) → Phase 4 (frontend) → Phase 5–6 (observability & E2E validation).
+2. Implementation order: Phase 0 (scaffolding) → Phase 1–3 (services) → Phase 4 (frontend) → Phase 5–6 (observability & E2E validation).
+
+---
+
+## 8. Phase 2 Forward-Look: GKE / CI/CD Pipeline
+
+> **Status:** Deferred — to be planned after Phase 1 demo is complete.
+
+The natural Phase 2 evolution is to deploy this stack to **Google Kubernetes Engine (GKE)** with a proper CI/CD pipeline, more closely resembling the bank's enterprise environment. Key additions would include:
+
+| Concern             | Approach                                                                  |
+| ------------------- | ------------------------------------------------------------------------- |
+| Container registry  | Google Artifact Registry                                                  |
+| CI/CD pipeline      | GitHub Actions → build images → push to Artifact Registry → deploy to GKE |
+| Orchestration       | GKE Autopilot (or Standard) cluster with Kubernetes manifests             |
+| Ingress             | GKE Ingress or nginx Ingress Controller (replacing local nginx)           |
+| Secrets             | GCP Secret Manager or Kubernetes Secrets                                  |
+| OpenObserve hosting | Dedicated GCE VM or GKE pod with persistent volume                        |
+
+> [!IMPORTANT]
+> **Nothing in Phase 1 hampers this progression.** All services are containerised, use health-check endpoints, emit structured logs, and export OTel telemetry — these are the exact prerequisites for a Kubernetes deployment. The Dockerfiles, OTel instrumentation, and service architecture carry forward unchanged.

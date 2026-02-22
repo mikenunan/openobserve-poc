@@ -1,0 +1,35 @@
+Savings Account Terms and Conditions
+
+1. Account Type
+This Savings Account ("the Account") is an interest-bearing deposit account provided
+by A-Bank plc. The Account is designed for personal savings and is not intended for
+day-to-day transactional use.
+
+2. Interest Rate
+  a) The current Annual Equivalent Rate (AER) is variable and published on our website
+  b) Interest is calculated daily and credited to your Account monthly
+  c) We reserve the right to change the interest rate with 14 days' prior notice
+  d) Changes to the Bank of England base rate may be reflected in your rate
+
+3. Deposits
+  a) Minimum opening deposit: GBP 1.00
+  b) Maximum balance: GBP 1,000,000
+  c) Deposits may be made via bank transfer, standing order, or internal transfer
+  d) Cash deposits are not accepted for this account type
+
+4. Withdrawals
+  a) Withdrawals are permitted without notice
+  b) A maximum of 6 withdrawals per calendar month is permitted
+  c) Withdrawals exceeding the monthly limit may incur a fee of GBP 5.00 per withdrawal
+  d) Withdrawals must be made to a nominated UK bank account in your name
+
+5. Tax
+Interest earned on this Account may be subject to UK Income Tax. If you are a basic
+rate taxpayer, you may benefit from the Personal Savings Allowance (PSA) of up to
+GBP 1,000 per tax year.
+
+6. FSCS Protection
+Eligible deposits in this Account are protected by the Financial Services Compensation
+Scheme (FSCS) up to GBP 85,000 per depositor. See the FSCS Info Sheet for details.
+
+Last updated: January 2026

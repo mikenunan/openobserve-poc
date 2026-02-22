@@ -17,7 +17,7 @@ processors:
 
 exporters:
     # OpenObserve — OTLP/HTTP export
-    otlphttp/openobserve:
+    otlp_http/openobserve:
         endpoint: http://openobserve:5080/api/default
         headers:
             Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206Q29tcGxleHBhc3MjMTIz"
@@ -32,12 +32,12 @@ service:
         traces:
             receivers: [otlp]
             processors: [batch]
-            exporters: [otlphttp/openobserve, debug]
+            exporters: [otlp_http/openobserve, debug]
         metrics:
             receivers: [otlp]
             processors: [batch]
-            exporters: [otlphttp/openobserve]
+            exporters: [otlp_http/openobserve]
         logs:
             receivers: [otlp]
             processors: [batch]
-            exporters: [otlphttp/openobserve]
+            exporters: [otlp_http/openobserve]

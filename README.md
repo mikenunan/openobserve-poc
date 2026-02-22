@@ -176,3 +176,4 @@ openobserve-poc/
 
 - [Architecture Plan](docs/architecture-plan.md) — full design, diagrams, and task breakdown
 - [Demo Script](docs/demo-script.md) — guided walkthrough for presenting the demo
+- [Implementation Walkthrough](docs/walkthrough.md) — what was built, how it was verified, and design decisions

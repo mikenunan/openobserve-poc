@@ -26,7 +26,7 @@ services:
         ports:
             - "8081:8081"
         environment:
-            - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+            - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
             - OTEL_SERVICE_NAME=partyman
         depends_on:
             otel-collector:
@@ -54,7 +54,7 @@ services:
         ports:
             - "8082:8082"
         environment:
-            - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+            - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
             - OTEL_SERVICE_NAME=documentcatalogue
         depends_on:
             otel-collector:
@@ -82,7 +82,7 @@ services:
         ports:
             - "8083:8083"
         environment:
-            - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+            - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
             - OTEL_SERVICE_NAME=documentfiling
             - PARTYMAN_URL=http://partyman:8081
             - DOCUMENTCATALOGUE_URL=http://documentcatalogue:8082

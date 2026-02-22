@@ -5,7 +5,11 @@ import App from "./App";
 import "./styles/index.css";
 
 // Initialise browser tracing before React renders
-initTelemetry();
+try {
+    initTelemetry();
+} catch (e) {
+    console.warn("[OTel] Failed to initialise telemetry:", e);
+}
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

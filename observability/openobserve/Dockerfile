@@ -7,7 +7,7 @@
 ARG OPENOBSERVE_VERSION=main
 
 # ---------- Stage 1: clone ----------
-FROM public.ecr.aws/docker/library/alpine:3 AS source
+FROM alpine:3 AS source
 ARG OPENOBSERVE_VERSION
 RUN apk add --no-cache git
 WORKDIR /src
@@ -15,14 +15,18 @@ RUN git clone --depth 1 --branch ${OPENOBSERVE_VERSION} \
     https://github.com/openobserve/openobserve.git .
 
 # ---------- Stage 2: build web UI ----------
-FROM public.ecr.aws/docker/library/node:24-trixie AS webbuilder
+FROM node:24-trixie AS webbuilder
 WORKDIR /web
 COPY --from=source /src/web /web/
 RUN npm install
 RUN NODE_OPTIONS="--max-old-space-size=8192" npm run build
 
 # ---------- Stage 3: build Rust backend ----------
-FROM public.ecr.aws/zinclabs/rust:trixie-sccache AS builder
+FROM rust:1-slim-bookworm AS builder
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    protobuf-compiler cmake make g++ pkg-config \
+    libssl-dev libsasl2-dev libzstd-dev \
+    && rm -rf /var/lib/apt/lists/*
 RUN rustc --version
 WORKDIR /openobserve
 COPY --from=source /src /openobserve
@@ -30,7 +34,7 @@ COPY --from=webbuilder /web/dist web/dist
 RUN cargo build --release
 
 # ---------- Stage 4: runtime ----------
-FROM public.ecr.aws/debian/debian:trixie-slim AS runtime
+FROM debian:trixie-slim AS runtime
 RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
 RUN update-ca-certificates

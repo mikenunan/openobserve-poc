@@ -1,3 +1,4 @@
-# Nothing local needed — the Dockerfile clones the source from GitHub
+# Only include the Dockerfile and the pre-downloaded binary
 *
 !Dockerfile
+!openobserve

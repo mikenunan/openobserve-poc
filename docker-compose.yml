@@ -138,8 +138,6 @@ services:
     openobserve:
         build:
             context: ./observability/openobserve
-            args:
-                - OPENOBSERVE_VERSION=main
         ports:
             - "5080:5080"
             - "5081:5081"

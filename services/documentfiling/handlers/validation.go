@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log/slog"
 	"net/http"
+	"net/url"
 	"os"
 )
 
@@ -47,7 +48,7 @@ func ValidateDocumentExists(documentName string, logger *slog.Logger) error {
 		catalogueURL = "http://localhost:8082"
 	}
 
-	url := fmt.Sprintf("%s/document?name=%s", catalogueURL, documentName)
+	url := fmt.Sprintf("%s/document?name=%s", catalogueURL, url.QueryEscape(documentName))
 	req, err := http.NewRequest(http.MethodHead, url, nil)
 	if err != nil {
 		return fmt.Errorf("creating request: %w", err)

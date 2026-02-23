@@ -17,18 +17,20 @@ import (
 )
 
 func main() {
-	// Structured JSON logging
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	slog.SetDefault(logger)
+	// Structured JSON logging (bootstrap — will switch to OTel bridge below)
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
 
-	// Initialise OpenTelemetry
+	// Initialise OpenTelemetry (traces + logs + metrics)
 	ctx := context.Background()
-	shutdownTracer, err := telemetry.Setup(ctx, "documentfiling")
+	logger, shutdownOTel, err := telemetry.Setup(ctx, "documentfiling")
 	if err != nil {
 		slog.Error("failed to initialise telemetry", "error", err)
 		os.Exit(1)
 	}
-	defer shutdownTracer(ctx)
+	defer shutdownOTel(ctx)
+
+	// Switch to OTel-backed logger so all subsequent slog calls are exported
+	slog.SetDefault(logger)
 
 	// Pre-seeded demo affiliations
 	seeds := []models.Affiliation{

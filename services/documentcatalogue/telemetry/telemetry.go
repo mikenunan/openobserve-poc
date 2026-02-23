@@ -71,7 +71,7 @@ func Setup(ctx context.Context, serviceName string) (*slog.Logger, func(context.
 		sdklog.WithResource(res),
 	)
 	// Bridge slog → OTel so all slog output is exported as OTel log records
-	logger := slog.New(otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(lp)))
+	logger := slog.New(otelslog.NewHandler(serviceName, otelslog.WithLoggerProvider(lp), otelslog.WithSource(true)))
 
 	// --- Metrics ---
 	metricExporter, err := otlpmetricgrpc.New(ctx,

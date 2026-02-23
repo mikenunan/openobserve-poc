@@ -1,0 +1,3 @@
+# Nothing local needed — the Dockerfile clones the source from GitHub
+*
+!Dockerfile

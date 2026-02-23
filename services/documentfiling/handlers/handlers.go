@@ -32,26 +32,26 @@ func (h *Handler) CreateAffiliation(w http.ResponseWriter, r *http.Request) {
 
 	// Cross-service validation: check customer exists
 	if err := ValidateCustomerExists(r.Context(), aff.PartyID, h.Logger); err != nil {
-		h.Logger.Warn("customer validation failed", "partyId", aff.PartyID, "error", err)
+		h.Logger.WarnContext(r.Context(), "customer validation failed", "partyId", aff.PartyID, "error", err)
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnprocessableEntity)
 		return
 	}
 
 	// Cross-service validation: check document exists
 	if err := ValidateDocumentExists(r.Context(), aff.DocumentName, h.Logger); err != nil {
-		h.Logger.Warn("document validation failed", "documentName", aff.DocumentName, "error", err)
+		h.Logger.WarnContext(r.Context(), "document validation failed", "documentName", aff.DocumentName, "error", err)
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnprocessableEntity)
 		return
 	}
 
 	// Attempt to add (returns false if duplicate)
 	if !h.Store.Add(aff.PartyID, aff.DocumentName) {
-		h.Logger.Info("duplicate affiliation rejected", "partyId", aff.PartyID, "documentName", aff.DocumentName)
+		h.Logger.InfoContext(r.Context(), "duplicate affiliation rejected", "partyId", aff.PartyID, "documentName", aff.DocumentName)
 		http.Error(w, `{"error":"affiliation already exists"}`, http.StatusConflict)
 		return
 	}
 
-	h.Logger.Info("affiliation created", "partyId", aff.PartyID, "documentName", aff.DocumentName)
+	h.Logger.InfoContext(r.Context(), "affiliation created", "partyId", aff.PartyID, "documentName", aff.DocumentName)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -74,7 +74,7 @@ func (h *Handler) GetDocuments(w http.ResponseWriter, r *http.Request) {
 
 	affiliations := h.Store.GetByPartyID(partyID)
 
-	h.Logger.Info("listing affiliations", "partyId", partyID, "count", len(affiliations))
+	h.Logger.InfoContext(r.Context(), "listing affiliations", "partyId", partyID, "count", len(affiliations))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(affiliations)

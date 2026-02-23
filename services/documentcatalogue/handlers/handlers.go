@@ -31,7 +31,7 @@ func (h *Handler) GetDocument(w http.ResponseWriter, r *http.Request) {
 
 	fileName, ok := documentNameToFile[docName]
 	if !ok {
-		h.Logger.Info("document not found", "name", docName)
+		h.Logger.InfoContext(r.Context(), "document not found", "name", docName)
 		http.Error(w, `{"error":"document not found"}`, http.StatusNotFound)
 		return
 	}
@@ -45,12 +45,12 @@ func (h *Handler) GetDocument(w http.ResponseWriter, r *http.Request) {
 	filePath := filepath.Join(h.DataDir, fileName)
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		h.Logger.Error("failed to read document file", "path", filePath, "error", err)
+		h.Logger.ErrorContext(r.Context(), "failed to read document file", "path", filePath, "error", err)
 		http.Error(w, `{"error":"internal server error"}`, http.StatusInternalServerError)
 		return
 	}
 
-	h.Logger.Info("serving document", "name", docName, "bytes", len(content))
+	h.Logger.InfoContext(r.Context(), "serving document", "name", docName, "bytes", len(content))
 
 	w.Header().Set("Content-Type", "application/json")
 	// Return as JSON with content field
@@ -70,7 +70,7 @@ func (h *Handler) GetDocumentNames(w http.ResponseWriter, r *http.Request) {
 		names = append(names, name)
 	}
 
-	h.Logger.Info("listing document names", "count", len(names))
+	h.Logger.InfoContext(r.Context(), "listing document names", "count", len(names))
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`[`))

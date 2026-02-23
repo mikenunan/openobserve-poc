@@ -20,7 +20,7 @@ type Handler struct {
 func (h *Handler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 	customers := h.Store.GetAll()
 
-	h.Logger.Info("listing customers", "count", len(customers))
+	h.Logger.InfoContext(r.Context(), "listing customers", "count", len(customers))
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(customers)
@@ -43,7 +43,7 @@ func (h *Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 
 	customer, found := h.Store.GetByID(partyID)
 	if !found {
-		h.Logger.Info("customer not found", "partyId", partyID)
+		h.Logger.InfoContext(r.Context(), "customer not found", "partyId", partyID)
 		http.Error(w, `{"error":"customer not found"}`, http.StatusNotFound)
 		return
 	}
@@ -54,7 +54,7 @@ func (h *Handler) GetCustomer(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.Logger.Info("retrieved customer", "partyId", partyID)
+	h.Logger.InfoContext(r.Context(), "retrieved customer", "partyId", partyID)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(customer)
@@ -76,7 +76,7 @@ func (h *Handler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
 
 	created := h.Store.Create(c)
 
-	h.Logger.Info("created customer", "partyId", created.PartyID, "name", created.FirstName+" "+created.LastName)
+	h.Logger.InfoContext(r.Context(), "created customer", "partyId", created.PartyID, "name", created.FirstName+" "+created.LastName)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -102,12 +102,12 @@ func (h *Handler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !h.Store.Update(c) {
-		h.Logger.Info("customer not found for update", "partyId", c.PartyID)
+		h.Logger.InfoContext(r.Context(), "customer not found for update", "partyId", c.PartyID)
 		http.Error(w, `{"error":"customer not found"}`, http.StatusNotFound)
 		return
 	}
 
-	h.Logger.Info("updated customer", "partyId", c.PartyID, "name", c.FirstName+" "+c.LastName)
+	h.Logger.InfoContext(r.Context(), "updated customer", "partyId", c.PartyID, "name", c.FirstName+" "+c.LastName)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(c)

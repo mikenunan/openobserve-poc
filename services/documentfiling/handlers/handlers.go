@@ -31,14 +31,14 @@ func (h *Handler) CreateAffiliation(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Cross-service validation: check customer exists
-	if err := ValidateCustomerExists(aff.PartyID, h.Logger); err != nil {
+	if err := ValidateCustomerExists(r.Context(), aff.PartyID, h.Logger); err != nil {
 		h.Logger.Warn("customer validation failed", "partyId", aff.PartyID, "error", err)
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnprocessableEntity)
 		return
 	}
 
 	// Cross-service validation: check document exists
-	if err := ValidateDocumentExists(aff.DocumentName, h.Logger); err != nil {
+	if err := ValidateDocumentExists(r.Context(), aff.DocumentName, h.Logger); err != nil {
 		h.Logger.Warn("document validation failed", "documentName", aff.DocumentName, "error", err)
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusUnprocessableEntity)
 		return

@@ -1,0 +1,52 @@
+[
+  {
+    "partyId": 12345,
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "addressLine1": "10 Downing Street",
+    "addressLine2": "",
+    "city": "London",
+    "postcode": "SW1A 2AA",
+    "country": "United Kingdom"
+  },
+  {
+    "partyId": 12346,
+    "firstName": "John",
+    "lastName": "Smith",
+    "addressLine1": "221B Baker Street",
+    "addressLine2": "Flat 2",
+    "city": "London",
+    "postcode": "NW1 6XE",
+    "country": "United Kingdom"
+  },
+  {
+    "partyId": 12347,
+    "firstName": "Anya",
+    "lastName": "Patel",
+    "addressLine1": "42 Castle Street",
+    "addressLine2": "",
+    "city": "Edinburgh",
+    "postcode": "EH2 3AH",
+    "country": "United Kingdom"
+  },
+  {
+    "partyId": 12348,
+    "firstName": "Liam",
+    "lastName": "O'Brien",
+    "addressLine1": "7 Harbour View",
+    "addressLine2": "Apt 14",
+    "city": "Cardiff",
+    "postcode": "CF10 4PA",
+    "country": "United Kingdom"
+  },
+  {
+    "partyId": 12349,
+    "firstName": "Fatima",
+    "lastName": "Al-Hassan",
+    "addressLine1": "15 Victoria Road",
+    "addressLine2": "",
+    "city": "Birmingham",
+    "postcode": "B1 1BB",
+    "country": "United Kingdom"
+  }
+]

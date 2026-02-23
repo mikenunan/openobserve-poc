@@ -1,0 +1,43 @@
+receivers:
+    otlp:
+        protocols:
+            grpc:
+                endpoint: 0.0.0.0:4317
+            http:
+                endpoint: 0.0.0.0:4318
+                cors:
+                    allowed_origins:
+                        - "http://localhost:8080"
+                        - "http://localhost:5173"
+
+processors:
+    batch:
+        timeout: 5s
+        send_batch_size: 1024
+
+exporters:
+    # OpenObserve — OTLP/HTTP export
+    otlp_http/openobserve:
+        endpoint: http://openobserve:5080/api/default
+        headers:
+            Authorization: "Basic YWRtaW5AZXhhbXBsZS5jb206Q29tcGxleHBhc3MjMTIz"
+            stream-name: default
+
+    # Console debug output (useful during development)
+    debug:
+        verbosity: detailed
+
+service:
+    pipelines:
+        traces:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [otlp_http/openobserve, debug]
+        metrics:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [otlp_http/openobserve, debug]
+        logs:
+            receivers: [otlp]
+            processors: [batch]
+            exporters: [otlp_http/openobserve, debug]

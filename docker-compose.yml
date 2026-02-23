@@ -1,0 +1,157 @@
+services:
+    # --- API Gateway ---
+    nginx:
+        image: nginx:alpine
+        ports:
+            - "8080:8080"
+        volumes:
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+        depends_on:
+            partyman:
+                condition: service_healthy
+            documentcatalogue:
+                condition: service_healthy
+            documentfiling:
+                condition: service_healthy
+            frontend:
+                condition: service_started
+        networks:
+            - app-network
+        restart: unless-stopped
+
+    # --- Backend Services ---
+    partyman:
+        build:
+            context: ./services/partyman
+        ports:
+            - "8081:8081"
+        environment:
+            - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+            - OTEL_SERVICE_NAME=partyman
+        depends_on:
+            otel-collector:
+                condition: service_started
+        networks:
+            - app-network
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "wget",
+                    "--spider",
+                    "-q",
+                    "http://localhost:8081/health",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+        restart: unless-stopped
+
+    documentcatalogue:
+        build:
+            context: ./services/documentcatalogue
+        ports:
+            - "8082:8082"
+        environment:
+            - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+            - OTEL_SERVICE_NAME=documentcatalogue
+        depends_on:
+            otel-collector:
+                condition: service_started
+        networks:
+            - app-network
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "wget",
+                    "--spider",
+                    "-q",
+                    "http://localhost:8082/health",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+        restart: unless-stopped
+
+    documentfiling:
+        build:
+            context: ./services/documentfiling
+        ports:
+            - "8083:8083"
+        environment:
+            - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
+            - OTEL_SERVICE_NAME=documentfiling
+            - PARTYMAN_URL=http://partyman:8081
+            - DOCUMENTCATALOGUE_URL=http://documentcatalogue:8082
+        depends_on:
+            partyman:
+                condition: service_healthy
+            documentcatalogue:
+                condition: service_healthy
+            otel-collector:
+                condition: service_started
+        networks:
+            - app-network
+        healthcheck:
+            test:
+                [
+                    "CMD",
+                    "wget",
+                    "--spider",
+                    "-q",
+                    "http://localhost:8083/health",
+                ]
+            interval: 10s
+            timeout: 5s
+            retries: 3
+            start_period: 10s
+        restart: unless-stopped
+
+    # --- Frontend ---
+    frontend:
+        build:
+            context: ./frontend
+        ports:
+            - "5173:5173"
+        networks:
+            - app-network
+        restart: unless-stopped
+
+    # --- Observability ---
+    otel-collector:
+        image: otel/opentelemetry-collector-contrib:latest
+        ports:
+            - "4317:4317" # OTLP gRPC
+            - "4318:4318" # OTLP HTTP
+        volumes:
+            - ./observability/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+        depends_on:
+            openobserve:
+                condition: service_started
+        networks:
+            - app-network
+        restart: unless-stopped
+
+    openobserve:
+        image: public.ecr.aws/zinclabs/openobserve:latest
+        ports:
+            - "5080:5080"
+            - "5081:5081"
+        environment:
+            - ZO_ROOT_USER_EMAIL=admin@example.com
+            - ZO_ROOT_USER_PASSWORD=Complexpass#123
+        volumes:
+            - openobserve-data:/data
+        networks:
+            - app-network
+        restart: unless-stopped
+
+volumes:
+    openobserve-data:
+
+networks:
+    app-network:
+        driver: bridge

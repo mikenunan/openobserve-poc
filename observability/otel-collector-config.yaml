@@ -36,8 +36,8 @@ service:
         metrics:
             receivers: [otlp]
             processors: [batch]
-            exporters: [otlp_http/openobserve]
+            exporters: [otlp_http/openobserve, debug]
         logs:
             receivers: [otlp]
             processors: [batch]
-            exporters: [otlp_http/openobserve]
+            exporters: [otlp_http/openobserve, debug]

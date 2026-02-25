@@ -48,6 +48,46 @@ For the full architecture plan with diagrams, see [`docs/architecture-plan.md`](
 - **Docker** with Docker Compose v2
 - ~2 GB free disk space (for container images)
 
+### If Working in a Restricted Environment
+
+Where direct access to Docker Hub and ECR is blocked (as is common on corporate hardware running Zscaler Private Access for example), you will need to transfer the two required observability images from another host where these restrictions do not apply.
+
+Follow these steps:
+
+#### 1. Pull images
+
+Pull the images on your unrestricted host, choosing the appropriate architecture for the restricted machine. So for Apple Silicon:
+
+```bash
+docker pull --platform linux/arm64 otel/opentelemetry-collector-contrib:latest
+docker pull --platform linux/arm64 openobserve/openobserve:latest
+```
+
+Or for Intel architecture:
+
+```bash
+docker pull --platform linux/amd64 otel/opentelemetry-collector-contrib:latest
+docker pull --platform linux/amd64 openobserve/openobserve:latest
+```
+
+#### 2. Export images to tarballs
+
+```bash
+docker save -o otel-collector-arm64.tar otel/opentelemetry-collector-contrib:latest
+docker save -o openobserve-arm64.tar openobserve/openobserve:latest
+```
+
+#### 3. Transfer and load on the target host
+
+Transfer the `.tar` files to the target machine (via USB stick, AirDrop, or allowed internal transfer), then load them:
+
+```bash
+docker load -i otel-collector-arm64.tar
+docker load -i openobserve-arm64.tar
+```
+
+Once loaded, `docker compose up` will use these local images instead of trying to pull from the blocked registries.
+
 ### Run
 
 ```bash
@@ -55,11 +95,12 @@ For the full architecture plan with diagrams, see [`docs/architecture-plan.md`](
 git clone https://github.com/mikenunan/openobserve-poc.git
 cd openobserve-poc
 docker compose up -d
-
-# Wait for health checks (~15 seconds), then open:
-#   Frontend:     http://localhost:8080
-#   OpenObserve:  http://localhost:5080
 ```
+
+Wait for health checks (~15 seconds), then open:
+
+* Frontend:     http://localhost:8080
+*  OpenObserve:  http://localhost:5080
 
 ### Stop
 
